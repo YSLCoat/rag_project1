@@ -29,6 +29,8 @@ __pycache__/
 *.egg-info/
 *.egg
 
+/node_modules/
+
 /frontend/node_modules/
 
 /frontend/dist/
