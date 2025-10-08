@@ -26,20 +26,16 @@ class RagPipeline():
             google_api_key=API_KEY
         )
 
-        if os.path.exists(DB_FAISS_PATH):
-            print(f"Loading existing vector store from: {DB_FAISS_PATH}")
-            # Load the vector store from disk
-            # The `allow_dangerous_deserialization` flag is required for loading FAISS indexes.
-            # This is safe here because we are the ones who created the file.
-            vector_store = FAISS.load_local(
-                DB_FAISS_PATH, 
-                self.embeddings, 
-                allow_dangerous_deserialization=True 
-            )
-        if vector_store is None:
-            self.vector_store = self.build_vector_store()
-        else: 
-            self.vector_store=vector_store
+        if not os.path.exists(DB_FAISS_PATH):
+            raise FileNotFoundError(f"CRITICAL ERROR: The FAISS vector store was not found at path: {DB_FAISS_PATH}. Please ensure it is included in the Docker image.")
+        
+        print(f"Loading existing vector store from: {DB_FAISS_PATH}")
+        # Load the vector store from disk
+        self.vector_store = FAISS.load_local(
+            DB_FAISS_PATH, 
+            self.embeddings, 
+            allow_dangerous_deserialization=True 
+        )
 
     def chunk_documents(documents: list):
         print("\nSplitting translated documents into chunks...")

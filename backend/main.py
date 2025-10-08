@@ -1,9 +1,12 @@
 from pydantic import BaseModel
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from rag_main import RagPipeline
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 
 @asynccontextmanager
@@ -13,20 +16,20 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
 origins = [
     "http://localhost",
     "http://localhost:5173",
+    FRONTEND_URL, # Add the deployed frontend URL to the list
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"], # Allows all methods (GET, POST, etc.)
-    allow_headers=["*"], # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
-
 
 
 class UserInput(BaseModel):
