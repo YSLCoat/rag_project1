@@ -20,7 +20,7 @@ app = FastAPI(lifespan=lifespan)
 origins = [
     "http://localhost",
     "http://localhost:5173",
-    FRONTEND_URL, # Add the deployed frontend URL to the list
+    FRONTEND_URL,
 ]
 
 app.add_middleware(
@@ -46,7 +46,7 @@ def get_rag_pipeline(request: Request):
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to the political claims verification application. Enjoy your stay!"}
+    return {"message": "Velkommen til Heimdall, appen oppkalt etter rettferdighetens gud. Målet med Heimdall er å bidra til kampen mot desinformasjon ved å teste påstander om partipolitikk opp mot de offisielle partiprogrammene. "}
 
 @app.post("/validate_claim", response_model=RagResponse)
 async def validate_claim(claim: UserInput, rag_pipeline: RagPipeline = Depends(get_rag_pipeline)):

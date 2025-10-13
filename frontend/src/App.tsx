@@ -17,7 +17,7 @@ function App() {
     event.preventDefault(); 
     
     if (!claimInput.trim()) {
-      setError('Please enter a claim to verify.');
+      setError('Vennligst skriv inn en påstand som skal verifiseres.');
       return;
     }
 
@@ -55,8 +55,8 @@ function App() {
   return (
     <div className="container">
       <header>
-        <h1>Political Claim Verifier</h1>
-        <p>Enter a political claim below, and our AI-powered system will provide a verification.</p>
+        <h1>Heimdall - verifiser påstander mot politiske partiprogrammer.</h1>
+        <p>Skriv en påstand knyttet til et parti sin politikk og trykk på 'verifiser'. Heimdall vil verfisere påstanden ved å søke etter relevant informasjon i partiprogrammer.</p>
       </header>
       
       <main>
@@ -64,13 +64,13 @@ function App() {
           <textarea
             value={claimInput}
             onChange={(e) => setClaimInput(e.target.value)}
-            placeholder="e.g., 'The economy grew by 5% last quarter.'"
+            placeholder=""
             rows={4}
             disabled={isLoading}
             aria-label="Political claim input"
           />
           <button type="submit" disabled={isLoading}>
-            {isLoading ? 'Verifying...' : 'Verify Claim'}
+            {isLoading ? 'verifiserer...' : 'Verifiser påstand'}
           </button>
         </form>
 
