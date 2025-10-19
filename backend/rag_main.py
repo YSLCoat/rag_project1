@@ -1,7 +1,10 @@
 import os
+import sys
+
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_community.vectorstores import FAISS
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -17,7 +20,7 @@ class RagPipeline():
     def __init__(self, name, vector_store=None):
         self.name = name
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash-001", 
+            model="gemini-2.5-pro", 
             temperature=0, 
             google_api_key=API_KEY
         )
@@ -91,7 +94,7 @@ class RagPipeline():
 
         prompt_template = """
         Du er en grunding fakta-sjekker. Din oppgave er å verifisere følgende påstander kun ved å basere deg på informasjonen som blir gitt tilgjengelig for deg. Denne informasjonen er hentet fra
-        de ulike politiske partiene sine partiprogrammer.
+        de ulike politiske partiene sine partiprogram.
 
         Analyser innholdet i påstanden og avgjør om påstanden er SANN PÅSTAND, FALSK PÅSTAND, eller IKKE MULIG Å AVGJØRE
 
@@ -121,4 +124,75 @@ class RagPipeline():
         print(f"\nChecking Claim: '{claim}'")
 
         response = rag_chain.invoke(claim)
+        return response.content
+    
+    def scrape_text_from_url(self, url: str) -> str:
+        try:
+            loader = WebBaseLoader(url)
+            docs = loader.load()
+    
+            combined_text = "\n\n".join([doc.page_content for doc in docs])
+            return combined_text
+        
+        except Exception as e:
+            print(f"Error scraping {url}: {e}", file=sys.stderr)
+            return ""
+    
+    def process_url_content(self, url):
+        retriever = self.vector_store.as_retriever(search_kwargs={"k": 7})
+
+        webpage_text = self.scrape_text_from_url(url)
+
+        prompt_template = """
+        Din rolle er å fungere som en nøytral politisk faktasjekker. 
+        Jobben din er å analysere en gitt tekst fra en nettside og verifisere eventuelle 
+        politiske påstander mot et sett med kildedokumenter (partiprogram).
+
+        PARTIPROGRAM:
+        {context}
+
+        ---
+
+        **TEKST FRA NETTSIDE (Input)
+        {input}
+
+        ---
+
+        DINE INSTRUKSJONER
+
+        1.  Analyser "TEKST FRA NETTSIDE Les gjennom teksten og avgjør om den inneholder politisk innhold eller 
+            politiske påstander.
+
+        2.  SVAR (Følg ett av disse to alternativene):
+
+            * ALTERNATIV A: Hvis teksten IKKE er politisk:
+                Svar kun med følgende setning:
+                "Teksten inneholder ikke politisk innhold, og verifisering er ikke nødvendig."
+
+            * ALTERNATIV B: Hvis teksten ER politisk
+                a.  Identifiser de viktigste politiske påstandene i "TEKST FRA NETTSIDE".
+                b.  For hver påstand, bruk informasjon fra partiprogrammene til å verifisere den.
+                c.  Presenter resultatet tydelig. Bruk dette formatet for hver påstand:
+                    
+                    Påstand: "[Siter den nøyaktige påstanden fra teksten]"
+                    
+                    Verifisering: "[Forklar hvordan "PARTIPROGRAM" bekrefter, avkrefter, 
+                    eller nyanserer påstanden. Vær nøyaktig og siter direkte 
+                    fra "PARTIPROGRAM" hvis mulig.]"
+                    
+                    Konklusjon: [Velg én: "I TRÅD MED PARTIPROGRAM", "I STRID MED PARTIPROGRAM", 
+                    eller "IKKE DEKKET AV PARTIPROGRAM"]
+
+        Vær objektiv og baser verifiseringen din KUN på informasjonen gitt i "PARTIPROGRAM". 
+        Ikke bruk ekstern kunnskap.
+        """
+        prompt = ChatPromptTemplate.from_template(prompt_template)
+
+        rag_chain = (
+            {"context": retriever, "input": RunnablePassthrough()}
+            | prompt
+            | self.llm
+        )
+
+        response = rag_chain.invoke(webpage_text)
         return response.content

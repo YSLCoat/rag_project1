@@ -39,6 +39,21 @@ header h1 {
   gap: 1rem;
 }
 
+.url-input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border-radius: 8px;
+  border: 1px solid #969ea6;
+  background-color: #f3f4f6;
+  color: #212529;
+  resize: none;
+  height: 2.5rem;
+  box-sizing: border-box;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
 textarea {
   width: 100%;
   padding: 0.8rem 1rem;
@@ -47,19 +62,18 @@ textarea {
   border-radius: 8px;
   border: 1px solid #969ea6;
   background-color: #f3f4f6;
-  color: #f0f0f0;
+  color: #212529;
   resize: vertical;
   min-height: 90px;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
 
-
-
-textarea:disabled {
-  background-color: #333;
+textarea:disabled,
+.url-input:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
   cursor: not-allowed;
 }
-
 .claim-form button {
   align-self: center;
   color: #212529;
@@ -117,5 +131,15 @@ textarea:disabled {
   color: #f0f0f0;
   font-size: 1.1rem;
   line-height: 1.6;
-  white-space: pre-wrap; /* Respects newlines from the backend response */
+  white-space: pre-wrap;
+}
+
+.result-item p a {
+  color: #90b8ff;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.result-item p a:hover {
+  text-decoration: underline;
 }

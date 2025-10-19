@@ -39,6 +39,10 @@ class RagResponse(BaseModel):
     claim: str
     verification: str
 
+class RagResponseNewsArticle(BaseModel):
+    url: str
+    verification: str
+
 
 def get_rag_pipeline(request: Request):
     return request.app.state.rag_pipeline
@@ -54,5 +58,15 @@ async def validate_claim(claim: UserInput, rag_pipeline: RagPipeline = Depends(g
     verification = rag_pipeline.process_claim(claim)
     return {
         "claim": claim,
+        "verification": verification
+    }
+
+
+@app.post("/validate_news_article_content", response_model=RagResponseNewsArticle)
+async def validate_news_article(url: UserInput, rag_pipeline: RagPipeline = Depends(get_rag_pipeline)):
+    url = url.input
+    verification = rag_pipeline.process_url_content(url)
+    return {
+        "url": url,
         "verification": verification
     }
