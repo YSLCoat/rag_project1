@@ -55,7 +55,7 @@ function App() {
   return (
     <div className="container">
       <header>
-        <h1>Heimdall</h1>
+        <h1>Politisk Fakasjekk</h1>
         <p className="p1">Verifiser påstander mot politiske partiprogrammer</p>
         <p className="p2">Skriv en påstand knyttet til et parti sin politikk og trykk på 'verifiser'. Heimdall vil verfisere påstanden ved å søke etter relevant informasjon i partiprogrammer.</p>
       </header>
